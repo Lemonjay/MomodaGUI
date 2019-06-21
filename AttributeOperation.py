@@ -387,28 +387,34 @@ class BasicAttribute(object):
                 # 添加模型固定属性user id和name
                 if 'uid' not in list(js_num_plcs.keys()):
                     js_num_plcs.update({'uid': _uid})
-                if js_num_plcs['name'] == '物体' or len(js_num_plcs['name']) == 0:
+                if js_num_plcs['name'] == '物体' or len(js_num_plcs['name']) == 0 or js_num_plcs['name'] == '未命名':
                     js_num_plcs.update({'name': _name})
                 # 添加指定字段field属性
                 if len(self.field_value_got(_bidx, _field)) != 0:
                     js_num_plcs.update({'prop': {_field: self.field_value_got(_bidx, _field)}})
 
             else:
+                _npls_num = npls
                 js_clds = js_num_plcs['clds']
                 for ncls in list(js_clds.keys()):
                     js_num_clds = js_clds[ncls]
-                    _bidx = js_num_clds['bIdx']
-                    _npls_num = npls
-                    _uid = '{1}{0}'.format(_npls_num, self.field_value_got(_bidx, 'userid_prefix'))
-                    _name = self.field_value_got(_bidx, 'type_name')
-                    # 添加模型固定属性user id和name
-                    if 'uid' not in list(js_num_plcs.keys()):
-                        js_num_plcs.update({'uid': _uid})
-                    if js_num_plcs['name'] == '组' or len(js_num_plcs['name']) == 0:
-                        js_num_plcs.update({'name': _name})
-                    # 添加指定字段field属性
-                    if len(self.field_value_got(_bidx, _field)) != 0:
-                        js_num_plcs.update({'prop': {_field: self.field_value_got(_bidx, _field)}})
+                    try:
+                        _bidx = js_num_clds['bIdx']
+                        _uid = '{1}{0}'.format(_npls_num, self.field_value_got(_bidx, 'userid_prefix'))
+                        _name = self.field_value_got(_bidx, 'type_name')
+
+                        # 添加模型固定属性user id和name
+                        if 'uid' not in list(js_num_plcs.keys()):
+                            js_num_plcs.update({'uid': _uid})
+                        if js_num_plcs['name'] == '组' or len(js_num_plcs['name']) == 0:
+                            js_num_plcs.update({'name': _name})
+
+                        # 添加指定字段field属性
+                        if len(_bidx) != 0 and len(self.field_value_got(_bidx, _field)) != 0:
+                            js_num_plcs.update({'prop': {_field: self.field_value_got(_bidx, _field)}})
+                        break
+                    except:
+                        print('% had a group' % js_num_clds)
 
         # dws attribute add
 
@@ -586,10 +592,13 @@ class AdvanceAttribute(object):
                     js_clds = js_num_plcs['clds']
                     for ncls in list(js_clds.keys()):
                         js_num_clds = js_clds[ncls]
-                        if js_num_clds['bIdx'] == self._model_bidx_got(_model_id):
-                            temp_info = {'key': str(npls), 'model_id': _model_id, 'model_info': str(js_num_plcs)}
-                            self._model_info.append(temp_info)
-                            break
+                        try:
+                            if js_num_clds['bIdx'] == self._model_bidx_got(_model_id):
+                                temp_info = {'key': str(npls), 'model_id': _model_id, 'model_info': str(js_num_plcs)}
+                                self._model_info.append(temp_info)
+                                break
+                        except:
+                            print('% had a group' % js_num_clds)
 
     def dws_model_info_extract_outdoor(self, _model_id):
         np_lists = list(self.js_plan.keys())
